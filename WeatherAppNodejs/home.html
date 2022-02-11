@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css">
+    <title>Dynamic Weather App using Nodejs </title>
+    <link
+    href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  />
+</head>
+<style>
+    *{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Quicksand", sans-serif;
+}
+body{
+    background-color: rgb(122, 173, 156);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+}
+html,body{
+   font-size: 20px;
+   height: 100%;
+}
+html{
+    background: rgb(58, 47, 107);
+}
+.wrapper{
+   width: 30vw;
+   height: 60vh;
+   border-radius: 1rem;
+   background: #6a8cbe;
+   box-shadow: 0 0.2rem 3rem rgba(0,0,0,0.3);
+   position: relative;
+   overflow: hidden;
+   min-width: 10rem;
+   min-height: 30rem;
+   transform: translate3d(0, 0, 0);
+}
+.wave {
+    opacity: 0.3;
+    position: absolute;
+    top: 135%;
+    left: 50%;
+    background: white;
+    width: 50rem;
+    height: 50rem;
+    margin-left: -25rem;
+    margin-top: -25rem;
+    transform-origin: 50% 48%;
+    border-radius: 43%;
+    animation: drift 3000ms infinite linear;
+    z-index: 1;
+  }
+.wave.-second{
+    animation: drift 7000ms infinite linear;
+    opacity: 0.1;
+    z-index: 3 !important;
+}
+.wave.-third {
+    animation: drift 5000ms infinite linear;
+    z-index: 2 !important;
+    opacity: 0.2;
+  }
+
+  .wrapper:after {
+    content: "";
+    display: block;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 11;
+    transform: translate3d(0, 0, 0);
+  }
+  @keyframes drift {
+    from {
+      transform: rotate(0deg);
+    }
+    from {
+      transform: rotate(360deg);
+    }
+  }
+  .weatherinfo{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 50%;
+    z-index: 4;
+  }
+  .location{
+    margin-top: 1rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 2rem;
+  }
+  .fa-street-view {
+    animation: rotates 3s linear infinite alternate;
+  }
+  @keyframes rotates {
+    from {
+      transform: translateX(-0.5rem);
+    }
+    to {
+      transform: translateX(0.5rem);
+    }
+  }
+  #date{
+    text-align: center;
+    margin-top: 0.5rem;
+    color: #57606f;
+    font-size: 1.2rem;
+    font-weight: 300;
+    text-transform: uppercase;
+  }
+  .temp{
+    margin-top: 2.5rem;
+    text-align: center;
+    font-size: 2rem;
+  }
+  .temprange {
+    text-align: center;
+    margin-top: 0.3rem;
+    font-weight: 300;
+    font-size: 1.2rem;
+    color: #57606f;
+  }
+  #weathericon{
+    height: 55%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem;
+  }
+  #weathericon .fas {
+    font-size: 6rem;
+    animation: fas-anime 3s linear infinite alternate;
+  }
+  @keyframes fas-anime {
+    from {
+      transform: scale(1.1);
+    }
+    to {
+      transform: scale(1.5);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .wrapper {
+      width: 90vw;
+      height: 80vh;
+    }
+
+    .wave {
+      top: 85%;
+    }
+
+    #weathericon {
+      font-size: 5em;
+    }
+
+    .weatherinfo {
+      font-size: 1.5rem;
+    }
+  }
+  @media (max-height: 500px) {
+    .wrapper {
+      height: 80vh;
+    }
+
+    .wave {
+      top: 115%;
+    }
+  }
+</style>
+<body>
+    <div class="wrapper">
+        <!-- for weathericon -->
+        <div id="weathericon">
+            <i class="fas fa-sun"  style="color: rgb(245, 245, 43)"></i>
+        </div>
+        <!-- different waves -->
+        <div class="wave "></div>
+        <div class="wave -second"></div>
+        <div class="wave -third"></div>
+        
+        <!-- weather information -->
+     <div class="weatherinfo">
+        <h2 class="location"><i class="fa fa-street-view" style="color: rgb(6, 15, 15)"></i>{%city%},{%country%}</h2>
+        <div id="date">WED | FB 5 | 2:00pm</div> 
+        <h1 class="temp">{%tempval%}&deg;C</h1>
+        <div class="temprange">MIN {%tempmin%}&deg;C | MAX {%tempmax%}&deg;C</div>
+    </div>
+    </div>
+</body>
+<script >
+    const curdate =document.getElementById("date");
+
+    let weathericon = document.getElementById("weathericon");
+
+      const tempStatus = "{%tempstatus%}";
+
+      //condition to check sunny or cloudy
+      if (tempStatus == "Sunny") {
+        weathericon.innerHTML =
+          "<i class='fas  fa-sun' style='color: #eccc68;'></i>";
+      } else if (tempStatus == "Clouds") {
+        weathericon.innerHTML =
+          "<i class='fas  fa-cloud' style='color: #f1f2f6;'></i>";
+      } else if (tempStatus == "Rainy") {
+        weathericon.innerHTML =
+          "<i class='fas  fa-cloud-rain' style='color: #a4b0be;'></i>";
+      } else {
+        weathericon.innerHTML =
+          "<i class='fas  fa-cloud' style='color:#f1f2f6;'></i>";
+      }
+const getcurrentday = ()=>{
+    var weekday= new Array(7);
+    weekday[0]='sunday';
+    weekday[1]='monday';
+    weekday[2]='tuesday';
+    weekday[3]='wednesday';
+    weekday[4]='thursday';
+    weekday[5]='friday';
+    weekday[6]='saturday';
+     
+    let currenttime=new Date();
+   let day=weekday[currenttime.getDay()];
+   return day;
+};
+const getcurrenttime=()=>{
+    var months=[
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "June",
+        "July",
+        "Aug",
+        "Sept",
+        "Oct",
+        "Nov",
+        "Dec",
+    ];
+
+    var nowtime=new Date();
+    var month=months[nowtime.getMonth()];
+    var nowdate=nowtime.getDate();
+    var hours=nowtime.getHours();
+    var min=nowtime.getMinutes();
+
+    // am and pm
+    let timeperiod="AM";
+    if(hours>11){
+        timeperiod="PM";
+        if(hours>12){
+            hours-=12;
+        }
+    }
+   if(min<10){
+      min='0'+min;
+   }
+   return `${month} ${nowdate} | ${hours}:${min}${timeperiod}`;
+};
+curdate.innerHTML=getcurrentday()+" | "+getcurrenttime();
+</script>
+</html>
